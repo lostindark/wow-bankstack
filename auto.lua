@@ -2,6 +2,8 @@ local core = BankStack
 local module = core:NewModule("Auto", "AceEvent-3.0")
 local Debug = core.Debug
 
+local issecretvalue = _G.issecretvalue or function() return false end
+
 local db
 function module:OnInitialize()
 	self.db = core.db_object:RegisterNamespace("Auto", {
@@ -70,7 +72,10 @@ end)
 
 function module:PLAYER_FLAGS_CHANGED(event, unit)
 	if unit ~= "player" then return end
-	if not UnitIsAFK("player") then return end
 	if not actions[db.profile.afk] then return end
+	local isAFK = UnitIsAFK(unit)
+	-- SecretInChatMessagingLockdown:
+	if issecretvalue(isAFK) then return end
+	if not isAFK then return end
 	actions[db.profile.afk]()
 end
